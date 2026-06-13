@@ -1,0 +1,17 @@
+# Web framework
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# Database
+duckdb>=0.10.0
+
+# Satellite propagation & coordinate conversion
+sgp4>=2.22
+numpy>=1.26.0
+
+# Spatial indexing (KD-tree conjunction scan)
+scipy>=1.11.0
+
+# Utilities
+python-dotenv>=1.0.0
+requests>=2.31.0

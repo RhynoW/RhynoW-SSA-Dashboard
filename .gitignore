@@ -1,0 +1,32 @@
+# Environment
+.env
+
+# Database (binary, provide separately)
+*.duckdb
+*.duckdb.wal
+
+# CesiumJS local build (download manually — see README)
+data/cesium/*
+!data/cesium/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+data/logs/
