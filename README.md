@@ -1,5 +1,5 @@
 ---
-title: RhynoW SSA Dashboard
+title: scenario04 Cesium Advanced
 emoji: 🛰️
 colorFrom: blue
 colorTo: indigo
