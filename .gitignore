@@ -6,9 +6,8 @@
 *.duckdb.wal
 *.zip
 
-# CesiumJS local build (download manually — see README)
-data/cesium/*
-!data/cesium/.gitkeep
+# CesiumJS local build — tracked in git (13 MB, no LFS needed)
+# data/cesium/*   ← removed: now committed directly
 
 # Python
 __pycache__/
