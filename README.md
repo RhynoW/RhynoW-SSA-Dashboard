@@ -1,3 +1,13 @@
+---
+title: RhynoW SSA Dashboard
+emoji: 🛰️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+app_port: 7860
+---
+
 # 太空態勢儀表板 / Space Situational Awareness Dashboard
 
 **離線 SSA/SDA 視覺化儀表板**，以 Flask + CesiumJS 1.114 建構，無需外部網路即可運行。

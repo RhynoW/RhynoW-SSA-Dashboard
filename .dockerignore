@@ -1,0 +1,26 @@
+# Git
+.git/
+.gitattributes
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Dev / OS
+.env
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# Not needed at runtime
+leo_annotator/
+tle_downloads/
+tle_downloads_temp/
+f107_cache.csv
+*.log
