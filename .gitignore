@@ -4,6 +4,7 @@
 # Database (binary, provide separately)
 *.duckdb
 *.duckdb.wal
+*.zip
 
 # CesiumJS local build (download manually — see README)
 data/cesium/*
@@ -17,6 +18,14 @@ __pycache__/
 venv/
 env/
 *.egg-info/
+
+# TLE downloads & cache
+tle_downloads/
+tle_downloads_temp/
+f107_cache.csv
+
+# Satellite annotation data (used by build_slim_db.py, not the dashboard)
+leo_annotator/
 
 # OS
 .DS_Store
