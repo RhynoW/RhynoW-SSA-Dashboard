@@ -1,8 +1,8 @@
 # Environment
 .env
 
-# Database (binary, provide separately)
-*.duckdb
+# Database (tracked via Git LFS)
+# *.duckdb   ← removed: now tracked by LFS
 *.duckdb.wal
 *.zip
 
@@ -24,12 +24,13 @@ tle_downloads/
 tle_downloads_temp/
 f107_cache.csv
 
-# Satellite annotation data (used by build_slim_db.py, not the dashboard)
-leo_annotator/
+# Satellite annotation data — tracked in git (xlsx only, not the full pipeline)
+# leo_annotator/   ← removed: xlsx committed for build_slim_db.py fallback
 
 # OS
 .DS_Store
 Thumbs.db
+~$*
 
 # IDE
 .vscode/
