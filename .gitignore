@@ -1,0 +1,41 @@
+# Environment
+.env
+
+# Database (tracked via Git LFS)
+# *.duckdb   ← removed: now tracked by LFS
+*.duckdb.wal
+*.zip
+
+# CesiumJS local build — tracked in git (13 MB, no LFS needed)
+# data/cesium/*   ← removed: now committed directly
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+
+# TLE downloads & cache
+tle_downloads/
+tle_downloads_temp/
+f107_cache.csv
+
+# Satellite annotation data — tracked in git (xlsx only, not the full pipeline)
+# leo_annotator/   ← removed: xlsx committed for build_slim_db.py fallback
+
+# OS
+.DS_Store
+Thumbs.db
+~$*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+data/logs/
