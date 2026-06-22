@@ -2,7 +2,7 @@
 """
 scenario04-Cesium-advanced02.py — 太空態勢儀表板（進階版）+ 台北覆蓋分析 + 時間軸
 ====================================================================================
-Port 7860 (HuggingFace Spaces default)
+Port 5013
 
 以 scenario04-Cesium-advanced01-2.py 為基礎，台北覆蓋頁面新增時間軸功能：
   - 可回溯過去 30 天（使用當時最新 TLE 從 DB 查詢）
@@ -88,7 +88,7 @@ E2         = F_EARTH * (2 - F_EARTH)
 DB_PATH               = Path(os.getenv("DB_PATH", DEFAULT_DB))
 SAT_META_CSV          = _SCRIPT_DIR / "sat_metadata.csv"
 HOST                  = os.getenv("HOST", "0.0.0.0")
-PORT                  = int(os.getenv("PORT", "7860"))
+PORT                  = int(os.getenv("PORT", "5013"))
 STATS_TTL             = int(os.getenv("STATS_TTL", "600"))
 _CONJ_THRESHOLD_KM    = float(os.getenv("CONJ_THRESHOLD_KM", "10.0"))
 _CONJ_TTL             = int(os.getenv("CONJ_TTL", "120"))
@@ -273,6 +273,10 @@ _sat_index:       dict[int, dict[str, Any]] = {}
 _index_loaded_at: float = 0.0
 _INDEX_TTL = 600
 
+_db_info_cache:     dict[str, Any] = {}
+_db_info_loaded_at: float = 0.0
+_DB_INFO_TTL = 300
+
 
 def load_sat_metadata_csv() -> dict[int, dict[str, str]]:
     if not SAT_META_CSV.exists():
@@ -308,6 +312,37 @@ def _resolve_db() -> Path | None:
     return None
 
 
+def _tle_select_sql(con: duckdb.DuckDBPyConnection, extra_where: str = "") -> str:
+    """動態偵測 raw_tle_archive 欄位，生成相容 slim/full DB 的查詢 SQL。"""
+    actual = {r[0] for r in con.execute(f"DESCRIBE {RAW_TABLE}").fetchall()}
+    obj_expr = (
+        "COALESCE(r.object_name, 'NORAD-' || CAST(r.norad_id AS VARCHAR))"
+        if "object_name" in actual
+        else "'NORAD-' || CAST(r.norad_id AS VARCHAR)"
+    )
+    has_lines = "line1" in actual and "line2" in actual
+    line_sel   = "r.line1, r.line2," if has_lines else "NULL AS line1, NULL AS line2,"
+    line_where = "r.line1 IS NOT NULL AND r.line2 IS NOT NULL" if has_lines else "1=1"
+
+    parts = [line_where]
+    if extra_where:
+        parts.append(extra_where)
+
+    return f"""
+        SELECT
+            r.norad_id,
+            {obj_expr} AS object_name,
+            {line_sel}
+            m.source_code, m.launch_date, m.intl_code
+        FROM {RAW_TABLE} r
+        LEFT JOIN {META_TABLE} m ON r.norad_id = m.norad_id
+        WHERE {" AND ".join(parts)}
+        QUALIFY ROW_NUMBER() OVER (
+            PARTITION BY r.norad_id ORDER BY r.epoch_utc DESC
+        ) = 1
+    """
+
+
 def build_sat_index() -> dict[int, dict[str, Any]]:
     db = _resolve_db()
     if db is None:
@@ -316,19 +351,7 @@ def build_sat_index() -> dict[int, dict[str, Any]]:
     t0 = time.monotonic()
     try:
         with duckdb.connect(str(db), read_only=True) as con:
-            rows = con.execute(f"""
-                SELECT
-                    r.norad_id,
-                    COALESCE(r.object_name, 'NORAD-' || CAST(r.norad_id AS VARCHAR)) AS object_name,
-                    r.line1, r.line2,
-                    m.source_code, m.launch_date, m.intl_code
-                FROM {RAW_TABLE} r
-                LEFT JOIN {META_TABLE} m ON r.norad_id = m.norad_id
-                WHERE r.line1 IS NOT NULL AND r.line2 IS NOT NULL
-                QUALIFY ROW_NUMBER() OVER (
-                    PARTITION BY r.norad_id ORDER BY r.epoch_utc DESC
-                ) = 1
-            """).fetchall()
+            rows = con.execute(_tle_select_sql(con)).fetchall()
     except Exception as exc:
         logger.error("建立索引失敗: %s", exc)
         return {}
@@ -410,6 +433,59 @@ def get_stats() -> dict[str, Any]:
         _stats_cache = build_stats(idx)
         _stats_loaded_at = time.monotonic()
     return _stats_cache
+
+
+def get_db_info() -> dict[str, Any]:
+    global _db_info_cache, _db_info_loaded_at
+    if _db_info_cache and (time.monotonic() - _db_info_loaded_at) < _DB_INFO_TTL:
+        return _db_info_cache
+
+    db = _resolve_db()
+    if db is None:
+        return {"error": "資料庫不存在"}
+
+    try:
+        mtime_ts = db.stat().st_mtime
+        db_updated_at = datetime.fromtimestamp(mtime_ts, tz=timezone.utc).isoformat()
+        db_size_mb = round(db.stat().st_size / 1024**2, 1)
+
+        with duckdb.connect(str(db), read_only=True) as con:
+            actual_cols = {r[0] for r in con.execute("DESCRIBE raw_tle_archive").fetchall()}
+            has_lines = "line1" in actual_cols and "line2" in actual_cols
+
+            where = "WHERE line1 IS NOT NULL AND line2 IS NOT NULL" if has_lines else ""
+            row = con.execute(f"""
+                SELECT
+                    COUNT(*)                 AS total_records,
+                    COUNT(DISTINCT norad_id) AS valid_sat_count,
+                    MIN(epoch_utc)           AS epoch_min,
+                    MAX(epoch_utc)           AS epoch_max
+                FROM raw_tle_archive {where}
+            """).fetchone()
+
+        def _iso(v: Any) -> str | None:
+            if v is None:
+                return None
+            if hasattr(v, "isoformat"):
+                return v.isoformat()
+            return str(v)
+
+        result: dict[str, Any] = {
+            "db_name":         db.name,
+            "db_size_mb":      db_size_mb,
+            "db_updated_at":   db_updated_at,
+            "has_tle_lines":   has_lines,
+            "total_records":   int(row[0]) if row and row[0] else 0,
+            "valid_sat_count": int(row[1]) if row and row[1] else 0,
+            "epoch_min":       _iso(row[2]) if row else None,
+            "epoch_max":       _iso(row[3]) if row else None,
+        }
+    except Exception as exc:
+        result = {"error": str(exc), "db_name": db.name}
+
+    _db_info_cache = result
+    _db_info_loaded_at = time.monotonic()
+    return result
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -825,20 +901,8 @@ def _get_index_for_time(ts: datetime) -> dict[int, dict[str, Any]]:
     logger.info("歷史 TLE 查詢：%s", ts_str)
     try:
         with duckdb.connect(str(db), read_only=True) as con:
-            rows = con.execute(f"""
-                SELECT
-                    r.norad_id,
-                    COALESCE(r.object_name, 'NORAD-' || CAST(r.norad_id AS VARCHAR)) AS object_name,
-                    r.line1, r.line2,
-                    m.source_code, m.launch_date, m.intl_code
-                FROM {RAW_TABLE} r
-                LEFT JOIN {META_TABLE} m ON r.norad_id = m.norad_id
-                WHERE r.line1 IS NOT NULL AND r.line2 IS NOT NULL
-                  AND r.epoch_utc <= TIMESTAMP '{ts_str}'
-                QUALIFY ROW_NUMBER() OVER (
-                    PARTITION BY r.norad_id ORDER BY r.epoch_utc DESC
-                ) = 1
-            """).fetchall()
+            sql = _tle_select_sql(con, extra_where=f"r.epoch_utc <= TIMESTAMP '{ts_str}'")
+            rows = con.execute(sql).fetchall()
     except Exception as exc:
         logger.warning("歷史 TLE 查詢失敗 (%s)，退回現行索引: %s", ts_str, exc)
         return get_sat_index()
@@ -1343,6 +1407,14 @@ body{font-family:Tahoma,sans-serif;background:#0a0e17;color:#c9d1d9;display:flex
 .cesium-widget-credits{display:none!important}
 .cesium-infoBox-description{background:#1e1e1e!important;color:#e8e8e8!important}
 .cesium-infoBox-description a{color:#8ab4f8!important}
+#db-info-bar{display:flex;align-items:center;gap:12px;padding:2px 14px;
+  font-size:10px;background:#050810;border-bottom:1px solid #161b22;
+  flex-shrink:0;overflow-x:auto;white-space:nowrap;color:#8b949e}
+.dbi-sep{color:#21262d;margin:0 2px}
+.dbi-k{color:#484f58}
+.dbi-v{color:#8b949e}
+.dbi-v.ok{color:#3fb950}
+.dbi-v.warn{color:#d29922}
 </style>
 <script>
 (function(){
@@ -1374,6 +1446,19 @@ body{font-family:Tahoma,sans-serif;background:#0a0e17;color:#c9d1d9;display:flex
   </div>
   <a id="taipei-link" href="/taipei" target="_blank">&#127988; 台北覆蓋分析</a>
   <div id="ts">—</div>
+</div>
+
+<div id="db-info-bar">
+  <span class="dbi-k">DB:</span>
+  <span id="dbi-name" class="dbi-v">—</span>
+  <span class="dbi-sep">|</span>
+  <span class="dbi-k">更新：</span><span id="dbi-mtime" class="dbi-v">—</span>
+  <span class="dbi-sep">|</span>
+  <span class="dbi-k">有效衛星：</span><span id="dbi-sats" class="dbi-v">—</span>
+  <span class="dbi-sep">|</span>
+  <span class="dbi-k">TLE 日期：</span><span id="dbi-epoch" class="dbi-v">—</span>
+  <span class="dbi-sep">|</span>
+  <span class="dbi-k">大小：</span><span id="dbi-size" class="dbi-v">—</span>
 </div>
 
 <div id="main">
@@ -1887,11 +1972,35 @@ async function toggleLayer(type,cb){
   }
 }
 
+async function loadDbInfo(){
+  try{
+    const r=await fetch('/api/db_info');
+    if(!r.ok) return;
+    const d=await r.json();
+    if(d.error) return;
+    document.getElementById('dbi-name').textContent=d.db_name||'—';
+    if(d.db_updated_at){
+      const mt=new Date(d.db_updated_at);
+      const diffH=(Date.now()-mt)/3600000;
+      const el=document.getElementById('dbi-mtime');
+      el.textContent=mt.toISOString().replace('T',' ').slice(0,16)+' UTC';
+      el.className='dbi-v '+(diffH<48?'ok':'warn');
+    }
+    if(d.valid_sat_count!=null)
+      document.getElementById('dbi-sats').textContent=d.valid_sat_count.toLocaleString()+' 顆';
+    if(d.epoch_min&&d.epoch_max)
+      document.getElementById('dbi-epoch').textContent=d.epoch_min.slice(0,10)+' ~ '+d.epoch_max.slice(0,10);
+    if(d.db_size_mb!=null)
+      document.getElementById('dbi-size').textContent=d.db_size_mb.toLocaleString()+' MB';
+  }catch(e){console.warn('DB info 載入失敗',e);}
+}
+
 async function init(){
   await initCesium();
   await loadBordersLayer();
   await loadStats();
   loadConjunctions();
+  loadDbInfo();
 }
 
 init().catch(e=>{
@@ -2633,6 +2742,14 @@ def create_app() -> Flask:
     @app.get("/api/stats")
     def api_stats():
         return jsonify(get_stats())
+
+    @app.get("/api/db_info")
+    def api_db_info():
+        resp = make_response(
+            _json.dumps(get_db_info(), ensure_ascii=False, default=str).encode("utf-8"))
+        resp.headers["Content-Type"]  = "application/json; charset=utf-8"
+        resp.headers["Cache-Control"] = f"public, max-age={_DB_INFO_TTL}"
+        return resp
 
     # ── 1-A  向量化 SGP4 全量傳播 ────────────────────────────────────────────
 
