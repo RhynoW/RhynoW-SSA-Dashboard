@@ -4,8 +4,9 @@ emoji: 🛰️
 colorFrom: blue
 colorTo: indigo
 sdk: docker
-pinned: false
 app_port: 7860
+hardware: cpu-basic
+pinned: false
 ---
 
 # 太空態勢儀表板 / Space Situational Awareness Dashboard
@@ -32,6 +33,9 @@ app_port: 7860
 | **全球國界** | Natural Earth 110m GeoJSON，離線可用 |
 | **SSN 觀測站** | 17 個 Space Surveillance Network 地面站，含類型 / 狀態 / 備註 |
 | **完全離線** | CesiumJS 從本地 `data/cesium/` 載入；地球貼圖本地供圖 |
+| **點選顯示 2h 軌道弧** | 點擊任何衛星實體後以 120 點 SGP4 外推繪製 2 小時軌道弧 |
+| **URL 衛星快速定位** | `?sat=25544`（NORAD ID）或 `?sat=STARLINK-1`（名稱），自動飛行定位 |
+| **URL 多衛星同時顯示** | `?sat=25544,55025,43688`，最多支援任意顆，各色軌道弧同時顯示 |
 
 ### 台北覆蓋分析（2D 地圖，`/taipei`）
 
@@ -127,6 +131,15 @@ python scenario04-Cesium-advanced02.py
 - 主儀表板（3D）：**http://localhost:7860**
 - 台北覆蓋分析（2D）：**http://localhost:7860/taipei**
 
+### URL 快速定位衛星（選用）
+
+| URL 範例 | 說明 |
+|----------|------|
+| `/?sat=25544` | 自動飛行至 ISS（NORAD ID 25544） |
+| `/?sat=STARLINK-1` | 以名稱搜尋並定位 |
+| `/?sat=25544,55025,43688` | 同時顯示三顆衛星及各自的 2h 軌道弧 |
+| `/?norad_id=25544` | 等同 `?sat=25544` |
+
 ---
 
 ## 目錄結構
@@ -140,8 +153,10 @@ scenario04-advanced01/
 └── data/
     ├── borders.geojson               # Natural Earth 110m 國界（已隨附）
     ├── globe_texture.jpg             # NASA Blue Marble 地球貼圖（已隨附）
-    └── cesium/                       # CesiumJS 1.114（git-ignored，手動下載）
-        └── .gitkeep
+    └── cesium/                       # CesiumJS 1.114（已隨附，18.5 MB）
+        ├── Cesium.js
+        ├── Widgets/
+        └── Workers/
 ```
 
 ---
@@ -157,6 +172,7 @@ scenario04-advanced01/
 | GET | `/api/position/<norad_id>` | 單顆衛星當前位置 |
 | GET | `/api/conjunctions` | `?threshold_km=10&max_pairs=200` → KD-tree 近距離掃描 |
 | GET | `/api/search` | `?q=<NORAD ID 或名稱>` → top-20 搜尋結果 |
+| GET | `/api/sat_orbit` | `?norad_id=25544&hours=2&pts=120` → 2h SGP4 軌道弧座標 |
 | GET | `/api/globe_texture` | 地球貼圖（JPEG）|
 | GET | `/api/layers/borders` | 國界 GeoJSON |
 | GET | `/api/layers/ssn_stations` | SSN 觀測站 GeoJSON |

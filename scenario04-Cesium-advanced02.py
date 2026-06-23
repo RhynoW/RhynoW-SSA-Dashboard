@@ -582,6 +582,37 @@ def propagate_batch(
     return results
 
 
+def propagate_arc(
+    line1: str, line2: str,
+    hours: float = 2.0, pts: int = 120,
+) -> list[dict[str, float]]:
+    """SGP4 外推軌道弧（預設 2h / 121 點），供前端畫軌跡折線用。"""
+    sat    = Satrec.twoline2rv(line1, line2)
+    now    = datetime.now(timezone.utc)
+    step_s = hours * 3600.0 / pts
+    positions: list[dict[str, float]] = []
+    for i in range(pts + 1):
+        t = now + timedelta(seconds=i * step_s)
+        jd, fr = jday(t.year, t.month, t.day, t.hour, t.minute,
+                      t.second + t.microsecond * 1e-6)
+        err, r_eci, _ = sat.sgp4(jd, fr)
+        if err != 0:
+            continue
+        try:
+            llh = eci_to_llh_batch(np.array([r_eci], dtype=float), t)
+            lat, lon, alt = float(llh[0, 0]), float(llh[0, 1]), float(llh[0, 2])
+        except Exception:
+            continue
+        if not (-500.0 < alt < 80_000.0):
+            continue
+        positions.append({
+            "lat":    round(lat, 4),
+            "lon":    round(lon, 4),
+            "alt_km": round(alt, 1),
+        })
+    return positions
+
+
 def propagate_now(line1: str, line2: str) -> tuple[float, float, float] | None:
     try:
         sat = Satrec.twoline2rv(line1, line2)
@@ -1503,7 +1534,7 @@ body{font-family:Tahoma,sans-serif;background:#0a0e17;color:#c9d1d9;display:flex
 'use strict';
 function startApp(){
 
-let viewer=null, satDs=null;
+let viewer=null, satDs=null; let orbitEnts=[];
 let statsData=null, conjData=null;
 let activeTab='country', activeFtype=null, activeFval=null;
 let panelMode='tabs';
@@ -1551,6 +1582,23 @@ async function initCesium(){
   viewer.scene.globe.depthTestAgainstTerrain=false;
   satDs=new Cesium.CustomDataSource('satellites');
   await viewer.dataSources.add(satDs);
+
+  viewer.selectedEntityChanged.addEventListener(ent=>{
+    _clearOrbit();
+    if(!ent||!ent.id) return;
+    const m=ent.id.match(/^sat_(\d+)$/);
+    if(!m) return;
+    const nid=parseInt(m[1]);
+    let hexColor='#58a6ff';
+    try{
+      if(ent.point&&ent.point.color){
+        const c=ent.point.color.getValue(Cesium.JulianDate.now());
+        if(c) hexColor=colorToHex(c);
+      }
+    }catch(e){}
+    showOrbitArc(nid,hexColor);
+  });
+
   document.getElementById('loading').style.display='none';
 }
 
@@ -1660,6 +1708,7 @@ function renderPanel(tab){
 async function filterGlobe(ftype,fval,color){
   if(activeFtype===ftype&&activeFval===fval){
     activeFtype=activeFval=null;
+    _clearOrbit();
     satDs.entities.removeAll(); entMap.clear();
     document.getElementById('filter-status').textContent='已清除篩選';
     renderPanel(activeTab);
@@ -1794,6 +1843,7 @@ function renderConjList(){
 }
 
 function flyToPair(pair){
+  _clearOrbit();
   satDs.entities.removeAll(); entMap.clear();
   const posA=Cesium.Cartesian3.fromDegrees(pair.primary_lon,pair.primary_lat,pair.primary_alt_km*1000);
   const posB=Cesium.Cartesian3.fromDegrees(pair.secondary_lon,pair.secondary_lat,pair.secondary_alt_km*1000);
@@ -1879,8 +1929,39 @@ function clearSearchUI(){
   if(panelMode==='search') setPanelMode('tabs');
 }
 
+function colorToHex(c){
+  const h=v=>Math.round(v*255).toString(16).padStart(2,'0');
+  return '#'+h(c.red)+h(c.green)+h(c.blue);
+}
+
+function _clearOrbit(){
+  orbitEnts.forEach(e=>{ try{ viewer.entities.remove(e); }catch(_){} });
+  orbitEnts=[];
+}
+
+async function showOrbitArc(nid,colorHex){
+  try{
+    const r=await fetch('/api/sat_orbit?norad_id='+nid+'&hours=2&pts=120');
+    if(!r.ok) return;
+    const d=await r.json();
+    if(!d.positions||d.positions.length<2) return;
+    const coords=d.positions.flatMap(p=>[p.lon,p.lat,p.alt_km*1000]);
+    const glowColor=Cesium.Color.fromCssColorString(colorHex||'#58a6ff').withAlpha(0.9);
+    orbitEnts.push(viewer.entities.add({
+      polyline:{
+        positions:Cesium.Cartesian3.fromDegreesArrayHeights(coords),
+        width:1.8,
+        material:new Cesium.PolylineGlowMaterialProperty({glowPower:0.1,color:glowColor}),
+        clampToGround:false,
+        arcType:Cesium.ArcType.NONE,
+      },
+    }));
+  }catch(e){ console.warn('軌道弧載入失敗',e); }
+}
+
 function flyToSat(s){
   if(s.lat==null) return;
+  _clearOrbit();
   satDs.entities.removeAll(); entMap.clear();
   const pos=Cesium.Cartesian3.fromDegrees(s.lon,s.lat,s.alt_km*1000);
   const col=Cesium.Color.fromCssColorString(getColor('country',s.country));
@@ -1893,6 +1974,7 @@ function flyToSat(s){
   viewer.selectedEntity=ent;
   document.getElementById('filter-status').textContent=s.name+' (#'+s.norad_id+')';
   activeFtype=activeFval=null;
+  showOrbitArc(s.norad_id, getColor('country',s.country));
 }
 
 async function toggleLayer(type,cb){
@@ -1995,12 +2077,122 @@ async function loadDbInfo(){
   }catch(e){console.warn('DB info 載入失敗',e);}
 }
 
+// 多衛星模式配色池（依序循環）
+const MULTI_COLORS=[
+  '#00E5FF','#FF6B6B','#69FF47','#FFD600','#FF9800',
+  '#E040FB','#00BFA5','#FF4081','#40C4FF','#CCFF90',
+];
+
+async function _resolveSat(token){
+  // token：純數字→NORAD ID，否則→名稱搜尋
+  if(/^\d+$/.test(token)){
+    try{
+      const r=await fetch('/api/position/'+encodeURIComponent(token));
+      if(r.ok){ const d=await r.json(); if(!d.error&&d.lat!=null) return d; }
+    }catch(e){}
+  }
+  try{
+    const r=await fetch('/api/search?q='+encodeURIComponent(token));
+    if(r.ok){
+      const d=await r.json();
+      const found=(d.results||[]).find(x=>x.lat!=null);
+      if(found) return found;
+    }
+  }catch(e){}
+  return null;
+}
+
+async function showMultiSats(tokens){
+  _clearOrbit();
+  satDs.entities.removeAll(); entMap.clear();
+  activeFtype=activeFval=null;
+  const statusEl=document.getElementById('filter-status');
+  statusEl.textContent='載入 '+tokens.length+' 顆衛星…';
+
+  // 依序解析（保留 MULTI_COLORS 順序）
+  const results=[];
+  for(let i=0;i<tokens.length;i++){
+    const sat=await _resolveSat(tokens[i]);
+    if(sat) results.push(Object.assign({},sat,{_color:MULTI_COLORS[i%MULTI_COLORS.length]}));
+  }
+
+  if(!results.length){
+    statusEl.textContent='查無任何衛星位置資料：'+tokens.join(', ');
+    return;
+  }
+
+  // 建立實體
+  results.forEach(s=>{
+    const pos=Cesium.Cartesian3.fromDegrees(s.lon,s.lat,s.alt_km*1000);
+    const col=Cesium.Color.fromCssColorString(s._color);
+    const ent=satDs.entities.add({
+      id:'sat_'+s.norad_id, name:s.name, position:pos,
+      point:{
+        pixelSize:11, color:col,
+        outlineColor:Cesium.Color.WHITE, outlineWidth:2,
+        scaleByDistance:new Cesium.NearFarScalar(5e5,1.6,8e6,0.8),
+      },
+      label:{
+        text:s.name,
+        font:'11px "Segoe UI",sans-serif',
+        fillColor:col,
+        outlineColor:Cesium.Color.BLACK, outlineWidth:2,
+        style:Cesium.LabelStyle.FILL_AND_OUTLINE,
+        pixelOffset:new Cesium.Cartesian2(0,-18),
+        distanceDisplayCondition:new Cesium.DistanceDisplayCondition(0,2e7),
+      },
+      description:new Cesium.ConstantProperty(_buildDesc(s)),
+    });
+    entMap.set(s.norad_id,ent);
+  });
+
+  // 並行載入所有軌道弧
+  await Promise.all(results.map(s=>showOrbitArc(s.norad_id,s._color)));
+
+  // 飛至包含所有衛星的視角
+  try{ await viewer.flyTo(satDs,{duration:2}); }catch(e){}
+
+  const found=results.length, req=tokens.length;
+  statusEl.textContent='顯示 '+found+(found<req?' / '+req:'')
+    +' 顆：'+results.map(s=>s.name).join('、');
+}
+
+async function autoSelectFromUrl(){
+  // 支援 ?sat=55025,66666,25544  ?sat=STARLINK-36833  ?norad_id=55025
+  const params   = new URLSearchParams(window.location.search);
+  const satParam = (params.get('sat') || params.get('norad_id') || params.get('norad') || '').trim();
+  if(!satParam) return;
+
+  const tokens = satParam.split(',').map(s=>s.trim()).filter(Boolean);
+
+  if(tokens.length > 1){
+    await showMultiSats(tokens);
+    return;
+  }
+
+  // 單顆衛星
+  const statusEl = document.getElementById('filter-status');
+  statusEl.textContent = '正在查詢「' + satParam + '」…';
+  try{
+    const result = await _resolveSat(satParam);
+    if(result){
+      flyToSat(result);
+    } else {
+      statusEl.textContent = '查無衛星或位置資料：' + satParam;
+    }
+  }catch(e){
+    console.warn('URL 衛星查詢失敗', e);
+    statusEl.textContent = '查詢失敗：' + e.message;
+  }
+}
+
 async function init(){
   await initCesium();
   await loadBordersLayer();
   await loadStats();
   loadConjunctions();
   loadDbInfo();
+  await autoSelectFromUrl();
 }
 
 init().catch(e=>{
@@ -2830,6 +3022,33 @@ def create_app() -> Flask:
             result["lon"]    = round(pos[1], 4)
             result["alt_km"] = round(pos[2], 1)
         return jsonify(result)
+
+    # ── 單顆衛星軌道弧 ──────────────────────────────────────────────────────
+
+    @app.get("/api/sat_orbit")
+    def api_sat_orbit():
+        """回傳單顆衛星 SGP4 外推軌道弧（預設 2h / 120 點）。"""
+        try:
+            norad_id = int(request.args.get("norad_id", 0))
+        except ValueError:
+            return jsonify({"error": "norad_id 必須為整數"}), 400
+        hours = float(request.args.get("hours", "2"))
+        pts   = min(int(request.args.get("pts", "120")), 720)
+        idx   = get_sat_index()
+        info  = idx.get(norad_id)
+        if info is None:
+            return jsonify({"error": f"NORAD {norad_id} 不在索引中"}), 404
+        l1, l2 = info.get("line1", ""), info.get("line2", "")
+        if not l1 or not l2:
+            return jsonify({"error": f"NORAD {norad_id} 無 TLE 資料"}), 404
+        positions = propagate_arc(l1, l2, hours=hours, pts=pts)
+        return jsonify({
+            "norad_id":  norad_id,
+            "name":      info["name"],
+            "hours":     hours,
+            "pts":       len(positions),
+            "positions": positions,
+        })
 
     # ── 2-A  近距離配對掃描 ──────────────────────────────────────────────────
 
