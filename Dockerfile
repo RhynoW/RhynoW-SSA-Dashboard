@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application files
 COPY scenario04-Cesium-advanced02.py .
 COPY sat_metadata.csv .
+COPY Logo_ATRDC.png .
 COPY data/ ./data/
 COPY space_db_slim.duckdb .
 
