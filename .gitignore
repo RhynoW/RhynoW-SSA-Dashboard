@@ -1,6 +1,19 @@
 # Environment
 .env
 
+# Logo (internal use only)
+Logo_ATRDC.png
+
+# npm package extract (redundant with data/cesium/)
+data/cesium-1.114.0/
+
+# Old backups
+OLD/
+
+# SQLite auxiliary WAL files
+*.mbtiles-shm
+*.mbtiles-wal
+
 # Database (tracked via Git LFS)
 # *.duckdb   ← removed: now tracked by LFS
 *.duckdb.wal

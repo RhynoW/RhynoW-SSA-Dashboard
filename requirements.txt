@@ -12,6 +12,13 @@ numpy>=1.26.0
 # Spatial indexing (KD-tree conjunction scan)
 scipy>=1.11.0
 
+# Configuration (overpass_cats.yaml hot-reload)
+pyyaml>=6.0
+
 # Utilities
 python-dotenv>=1.0.0
 requests>=2.31.0
+
+# Optional: Redis cache backend (multi-container / K8s cross-pod cache)
+# Uncomment if REDIS_URL is set in .env
+# redis>=4.0

@@ -1,0 +1,37 @@
+# overpass_cats.yaml — 台北覆蓋分析衛星類別定義
+# 修改此檔後呼叫 POST /api/admin/reload_cats 即時生效，無需重啟服務
+
+US_EO:
+  label: "美國商用光學衛星"
+  sublabel: "Vantor/Maxar · Planet SkySat/Pelican"
+  color: "#4488FF"
+  kw: ["WORLDVIEW", "GEOEYE", "LEGION", "SKYSAT", "PELICAN"]
+
+CN_COMM:
+  label: "中國商用光學衛星"
+  sublabel: "SuperView · 高分 · 吉林"
+  color: "#FF9800"
+  kw: ["SUPERVIEW", "JILIN", "ZHUHAI", "GAOFEN"]
+
+CN_MIL:
+  label: "中國軍用偵察衛星"
+  sublabel: "遙感 Yaogan"
+  color: "#F44336"
+  kw: ["YAOGAN", "JIANBING"]
+
+TW_TASA:
+  label: "台灣 TASA 衛星"
+  sublabel: "Formosat-5 / -7 / -8"
+  color: "#00E5FF"
+  kw:
+    - "FORMOSAT-5"
+    - "FORMOSAT 5"
+    - "FORMOSAT5"
+    - "FORMOSAT-7"
+    - "FORMOSAT 7"
+    - "FORMOSAT7"
+    - "FORMOSAT-8"
+    - "FORMOSAT 8"
+    - "FORMOSAT8"
+    - "COSMIC-2"
+    - "COSMIC2"

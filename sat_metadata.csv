@@ -32264,7 +32264,7 @@ norad_id,name_en,source_code,launch_date,intl_code,purpose,constellation,notes
 69503,OBJECT B,TBD,2026-06-12,2026-132B,未知,,src:satcat
 69504,BRO-22,France (FR),2026-06-12,2026-132C,有效載荷,,src:satcat
 69505,OBJECT D,TBD,2026-06-12,2026-132D,未知,,src:satcat
-69506,OBJECT E,TBD,2026-06-12,2026-132E,未知,,src:satcat
+69506,OBJECT E,Japan (JPN),2026-06-12,2026-132E,未知,,src:satcat
 69507,OBJECT F,TBD,2026-06-12,2026-132F,未知,,src:satcat
 69508,STARLINK-37536,United States (US),2026-06-12,2026-133A,有效載荷,,src:satcat
 69509,STARLINK-37341,United States (US),2026-06-12,2026-133B,有效載荷,,src:satcat
@@ -32304,6 +32304,30 @@ norad_id,name_en,source_code,launch_date,intl_code,purpose,constellation,notes
 69543,OBJECT F,China (PRC),2026-06-15,2026-134F,未知,,src:satcat
 69544,OBJECT G,China (PRC),2026-06-15,2026-134G,未知,,src:satcat
 69545,OBJECT H,China (PRC),2026-06-15,2026-134H,未知,,src:satcat
+69546,STARLINK-37880,United States (US),2026-06-15,2026-135A,有效載荷,,src:satcat
+69547,STARLINK-37881,United States (US),2026-06-15,2026-135B,有效載荷,,src:satcat
+69548,STARLINK-37265,United States (US),2026-06-15,2026-135C,有效載荷,,src:satcat
+69549,STARLINK-37871,United States (US),2026-06-15,2026-135D,有效載荷,,src:satcat
+69550,STARLINK-37865,United States (US),2026-06-15,2026-135E,有效載荷,,src:satcat
+69551,STARLINK-37862,United States (US),2026-06-15,2026-135F,有效載荷,,src:satcat
+69552,STARLINK-37861,United States (US),2026-06-15,2026-135G,有效載荷,,src:satcat
+69553,STARLINK-37859,United States (US),2026-06-15,2026-135H,有效載荷,,src:satcat
+69554,STARLINK-37860,United States (US),2026-06-15,2026-135J,有效載荷,,src:satcat
+69555,STARLINK-37858,United States (US),2026-06-15,2026-135K,有效載荷,,src:satcat
+69556,STARLINK-37927,United States (US),2026-06-15,2026-135L,有效載荷,,src:satcat
+69557,STARLINK-37929,United States (US),2026-06-15,2026-135M,有效載荷,,src:satcat
+69558,STARLINK-37954,United States (US),2026-06-15,2026-135N,有效載荷,,src:satcat
+69559,STARLINK-37958,United States (US),2026-06-15,2026-135P,有效載荷,,src:satcat
+69560,STARLINK-37950,United States (US),2026-06-15,2026-135Q,有效載荷,,src:satcat
+69561,STARLINK-37952,United States (US),2026-06-15,2026-135R,有效載荷,,src:satcat
+69562,STARLINK-37935,United States (US),2026-06-15,2026-135S,有效載荷,,src:satcat
+69563,STARLINK-37936,United States (US),2026-06-15,2026-135T,有效載荷,,src:satcat
+69564,STARLINK-37932,United States (US),2026-06-15,2026-135U,有效載荷,,src:satcat
+69565,STARLINK-37916,United States (US),2026-06-15,2026-135V,有效載荷,,src:satcat
+69566,STARLINK-37909,United States (US),2026-06-15,2026-135W,有效載荷,,src:satcat
+69567,STARLINK-37934,United States (US),2026-06-15,2026-135X,有效載荷,,src:satcat
+69568,STARLINK-37938,United States (US),2026-06-15,2026-135Y,有效載荷,,src:satcat
+69569,STARLINK-37924,United States (US),2026-06-15,2026-135Z,有效載荷,,src:satcat
 69570,SJ-31,China (PRC),2026-06-16,2026-136A,有效載荷,,src:satcat
 69571,CZ-3B R/B,China (PRC),2026-06-16,2026-136B,火箭體,,src:satcat
 69572,OBJECT A,China (PRC),2026-06-17,2026-137A,未知,,src:satcat
@@ -32326,6 +32350,42 @@ norad_id,name_en,source_code,launch_date,intl_code,purpose,constellation,notes
 69589,AST BLUEBIRD 8,United States (US),2026-06-17,2026-139A,有效載荷,,src:satcat
 69590,AST BLUEBIRD 9,United States (US),2026-06-17,2026-139B,有效載荷,,src:satcat
 69591,AST BLUEBIRD 10,United States (US),2026-06-17,2026-139C,有效載荷,,src:satcat
+69592,KUIPER-00423,United States (US),2026-06-17,2026-140A,有效載荷,,src:satcat
+69593,KUIPER-00428,United States (US),2026-06-17,2026-140B,有效載荷,,src:satcat
+69594,KUIPER-00481,United States (US),2026-06-17,2026-140C,有效載荷,,src:satcat
+69595,KUIPER-00490,United States (US),2026-06-17,2026-140D,有效載荷,,src:satcat
+69596,KUIPER-00493,United States (US),2026-06-17,2026-140E,有效載荷,,src:satcat
+69597,KUIPER-00496,United States (US),2026-06-17,2026-140F,有效載荷,,src:satcat
+69598,KUIPER-00513,United States (US),2026-06-17,2026-140G,有效載荷,,src:satcat
+69599,KUIPER-00516,United States (US),2026-06-17,2026-140H,有效載荷,,src:satcat
+69600,KUIPER-00517,United States (US),2026-06-17,2026-140J,有效載荷,,src:satcat
+69601,KUIPER-00520,United States (US),2026-06-17,2026-140K,有效載荷,,src:satcat
+69602,KUIPER-00522,United States (US),2026-06-17,2026-140L,有效載荷,,src:satcat
+69603,KUIPER-00528,United States (US),2026-06-17,2026-140M,有效載荷,,src:satcat
+69604,KUIPER-00532,United States (US),2026-06-17,2026-140N,有效載荷,,src:satcat
+69605,KUIPER-00533,United States (US),2026-06-17,2026-140P,有效載荷,,src:satcat
+69606,KUIPER-00534,United States (US),2026-06-17,2026-140Q,有效載荷,,src:satcat
+69607,KUIPER-00537,United States (US),2026-06-17,2026-140R,有效載荷,,src:satcat
+69608,KUIPER-00538,United States (US),2026-06-17,2026-140S,有效載荷,,src:satcat
+69609,KUIPER-00540,United States (US),2026-06-17,2026-140T,有效載荷,,src:satcat
+69610,KUIPER-00541,United States (US),2026-06-17,2026-140U,有效載荷,,src:satcat
+69611,KUIPER-00542,United States (US),2026-06-17,2026-140V,有效載荷,,src:satcat
+69612,KUIPER-00543,United States (US),2026-06-17,2026-140W,有效載荷,,src:satcat
+69613,KUIPER-00544,United States (US),2026-06-17,2026-140X,有效載荷,,src:satcat
+69614,KUIPER-00546,United States (US),2026-06-17,2026-140Y,有效載荷,,src:satcat
+69615,KUIPER-00547,United States (US),2026-06-17,2026-140Z,有效載荷,,src:satcat
+69616,KUIPER-00549,United States (US),2026-06-17,2026-140AA,有效載荷,,src:satcat
+69617,KUIPER-00550,United States (US),2026-06-17,2026-140AB,有效載荷,,src:satcat
+69618,KUIPER-00551,United States (US),2026-06-17,2026-140AC,有效載荷,,src:satcat
+69619,KUIPER-00554,United States (US),2026-06-17,2026-140AD,有效載荷,,src:satcat
+69620,KUIPER-00555,United States (US),2026-06-17,2026-140AE,有效載荷,,src:satcat
+69621,KUIPER-00556,United States (US),2026-06-17,2026-140AF,有效載荷,,src:satcat
+69622,KUIPER-00557,United States (US),2026-06-17,2026-140AG,有效載荷,,src:satcat
+69623,KUIPER-00560,United States (US),2026-06-17,2026-140AH,有效載荷,,src:satcat
+69624,KUIPER-00561,United States (US),2026-06-17,2026-140AJ,有效載荷,,src:satcat
+69625,KUIPER-00564,United States (US),2026-06-17,2026-140AK,有效載荷,,src:satcat
+69626,KUIPER-00567,United States (US),2026-06-17,2026-140AL,有效載荷,,src:satcat
+69627,KUIPER-00573,United States (US),2026-06-17,2026-140AM,有效載荷,,src:satcat
 69628,KZ-11 R/B,China (PRC),2026-06-17,2026-138H,火箭體,,src:satcat
 69629,ZQ-2E  DEB,China (PRC),2026-06-09,2026-128D,碎片,,src:satcat
 69630,ZQ-2E DEB,China (PRC),2026-06-09,2026-128E,碎片,,src:satcat
@@ -32335,8 +32395,46 @@ norad_id,name_en,source_code,launch_date,intl_code,purpose,constellation,notes
 69634,ZQ-2E DEB,China (PRC),2026-06-09,2026-128J,碎片,,src:satcat
 69635,ZQ-2E DEB,China (PRC),2026-06-09,2026-128K,碎片,,src:satcat
 69636,OBJECT J,China (PRC),2026-06-17,2026-138J,未知,,src:satcat
+69637,USA 610,United States (US),2026-06-19,2026-141A,有效載荷,,src:satcat
+69638,USA 611,United States (US),2026-06-19,2026-141B,有效載荷,,src:satcat
+69639,USA 612,United States (US),2026-06-19,2026-141C,有效載荷,,src:satcat
+69640,USA 613,United States (US),2026-06-19,2026-141D,有效載荷,,src:satcat
+69641,USA 614,United States (US),2026-06-19,2026-141E,有效載荷,,src:satcat
+69642,USA 615,United States (US),2026-06-19,2026-141F,有效載荷,,src:satcat
+69643,USA 616,United States (US),2026-06-19,2026-141G,有效載荷,,src:satcat
+69644,USA 617,United States (US),2026-06-19,2026-141H,有效載荷,,src:satcat
+69645,USA 618,United States (US),2026-06-19,2026-141J,有效載荷,,src:satcat
 69646,VICTUS HAZE PUMA,United States (US),2026-06-19,2026-142A,有效載荷,,src:satcat
 69647,ELECTRON R/B,United States (US),2026-06-19,2026-142B,火箭體,,src:satcat
+69649,STARLINK-37656,United States (US),2026-06-21,2026-143A,有效載荷,,src:satcat
+69651,STARLINK-37749,United States (US),2026-06-21,2026-143C,有效載荷,,src:satcat
+69652,STARLINK-37819,United States (US),2026-06-21,2026-143D,有效載荷,,src:satcat
+69653,STARLINK-37729,United States (US),2026-06-21,2026-143E,有效載荷,,src:satcat
+69654,STARLINK-37838,United States (US),2026-06-21,2026-143F,有效載荷,,src:satcat
+69655,STARLINK-37884,United States (US),2026-06-21,2026-143G,有效載荷,,src:satcat
+69656,STARLINK-37876,United States (US),2026-06-21,2026-143H,有效載荷,,src:satcat
+69657,STARLINK-37784,United States (US),2026-06-21,2026-143J,有效載荷,,src:satcat
+69658,STARLINK-37851,United States (US),2026-06-21,2026-143K,有效載荷,,src:satcat
+69659,STARLINK-37229,United States (US),2026-06-21,2026-143L,有效載荷,,src:satcat
+69660,STARLINK-37556,United States (US),2026-06-21,2026-143M,有效載荷,,src:satcat
+69661,STARLINK-37867,United States (US),2026-06-21,2026-143N,有效載荷,,src:satcat
+69662,STARLINK-37852,United States (US),2026-06-21,2026-143P,有效載荷,,src:satcat
+69663,STARLINK-37554,United States (US),2026-06-21,2026-143Q,有效載荷,,src:satcat
+69664,STARLINK-37830,United States (US),2026-06-21,2026-143R,有效載荷,,src:satcat
+69665,STARLINK-37837,United States (US),2026-06-21,2026-143S,有效載荷,,src:satcat
+69666,STARLINK-37943,United States (US),2026-06-21,2026-143T,有效載荷,,src:satcat
+69667,STARLINK-37941,United States (US),2026-06-21,2026-143U,有效載荷,,src:satcat
+69668,STARLINK-37930,United States (US),2026-06-21,2026-143V,有效載荷,,src:satcat
+69669,STARLINK-37945,United States (US),2026-06-21,2026-143W,有效載荷,,src:satcat
+69670,STARLINK-37948,United States (US),2026-06-21,2026-143X,有效載荷,,src:satcat
+69671,STARLINK-37949,United States (US),2026-06-21,2026-143Y,有效載荷,,src:satcat
+69672,STARLINK-37946,United States (US),2026-06-21,2026-143Z,有效載荷,,src:satcat
+69674,OBJECT A,China (PRC),2026-06-23,2026-144A,未知,,src:satcat
+69675,OBJECT B,China (PRC),2026-06-23,2026-144B,未知,,src:satcat
+69676,OBJECT G,TBD,2026-06-12,2026-132G,未知,,src:satcat
+69701,OBJECT A,TBD,2026-06-26,2026-146A,未知,,src:satcat
+69702,OBJECT B,TBD,2026-06-26,2026-146B,未知,,src:satcat
+69703,OBJECT C,TBD,2026-06-26,2026-146C,未知,,src:satcat
 81011,TBA - TO BE ASSIGNED,TBD,,,有效載荷,,src:db
 81015,TBA - TO BE ASSIGNED,TBD,,,有效載荷,,src:db
 81021,TBA - TO BE ASSIGNED,TBD,,,有效載荷,,src:db
