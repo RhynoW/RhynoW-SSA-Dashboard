@@ -13,9 +13,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
-COPY scenario04-Cesium-advanced02.py .
+COPY scenario04-Cesium-advanced03.py .
 COPY sat_metadata.csv .
-COPY Logo_ATRDC.png .
+COPY overpass_cats.yaml .
 COPY data/ ./data/
 COPY space_db_slim.duckdb .
 
@@ -26,4 +26,4 @@ ENV DB_PATH=/app/space_db_slim.duckdb
 
 EXPOSE 7860
 
-CMD ["python", "scenario04-Cesium-advanced02.py"]
+CMD ["python", "scenario04-Cesium-advanced03.py"]
